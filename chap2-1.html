@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Simple threejs page</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r72/three.min.js"></script>
+    <script type="text/javascript">
+
+    function onLoad() {
+        
+        var container = document.getElementById("container");
+        
+        // Create the threejs renderer
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
+        container.appendChild(renderer.domElement);
+        
+        // Create a threejs scene
+        var scene = new THREE.Scene();
+        
+        // Add a camera
+        var camera = new THREE.PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 1, 4000);
+        camera.position.set(0, 0, 3.3333);
+        scene.add(camera);
+        
+        // Create a rectangle
+        var geo = new THREE.PlaneGeometry(1, 1);
+        var mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial());
+        scene.add(mesh);
+        
+        renderer.render(scene, camera);
+    }
+
+    </script>
+</head>
+
+<body onLoad="onLoad();">
+    <div id="container" style="width:500px; height:500px; background-color:#000000"></div>
+</body>
+</html>
+
