@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Spinning cubie</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r72/three.min.js"></script>
+    <script src="js/requestAnimFrame.js"></script>
+    <script type="text/javascript">
+    
+
+    
+    // Globals
+    var renderer = null;
+    var scene = null;
+    var camera = null;
+    var cube = null;
+    var animating = false;
+    
+    function onLoad() {
+        var container = document.getElementById("container");
+        
+        // create the renderer and scene
+        renderer = new THREE.WebGLRenderer( {antialias: true} );
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
+        container.appendChild(renderer.domElement);
+        
+        scene = new THREE.Scene();
+        
+        // Add the camera
+        camera = new THREE.PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 1, 4000);
+        camera.position.set(0, 0, 3);
+        // leave cam with default LookAt value
+        
+        // Add a light
+        var light = new THREE.DirectionalLight(0xffffff, 1.5);
+        light.position.set(0, 0, 1);
+        scene.add(light);
+        
+        // Create a shaded textured cube.
+        // First the texture map...
+        var mapUrl = "https://raw.githubusercontent.com/tparisi/WebGLBook/master/images/molumen_small_funny_angry_monster.jpg";
+        THREE.ImageUtils.crossOrigin = ''; // Allow threejs to load images cross domain
+        var map = THREE.ImageUtils.loadTexture(mapUrl);
+        
+        // ... then the material (Phong)...
+        var material = new THREE.MeshPhongMaterial({map: map});
+        
+        // ... then the cube ...
+        var geo = new THREE.CubeGeometry(1, 1, 1);
+        
+        // ... and finally combine to make mesh
+        cube = new THREE.Mesh(geo, material);
+        
+        // Rotate cube so we can see more than a square.
+        cube.rotation.x = Math.PI / 5;
+        cube.rotation.y = Math.PI / 5;
+        
+        scene.add(cube);
+        
+        addMouseHandler();
+        run();
+    }
+    
+    function run() {
+        // render
+        renderer.render(scene, camera);
+        
+        // spin for next frame
+        if (animating) {
+            cube.rotation.y -= 0.01;
+        }
+        
+        // Get next frame
+        requestAnimFrame(run);
+    }
+    
+    function addMouseHandler() {
+        var canvas = renderer.domElement;
+        // when user clicks, toggle animating
+        canvas.addEventListener('mouseup', function(event) {
+            event.preventDefault();
+            animating = !animating;
+        }, false);
+    }
+
+    </script>
+</head>
+
+<body onLoad="onLoad();">
+    <h1>Hello!</h1>
+    <div id="container" 
+        style="width:95%; height:80%; position: absolute;">
+    </div>
+    <div id="prompt"
+        style="width:95%; height:6%; bottom: 0; position: absolute;">
+        Click to animate
+    </div>
+</body>
+</html>
+

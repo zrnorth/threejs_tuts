@@ -1,1 +1,3 @@
-learning threejs with the O'reilly media book
+Learning threejs via various books, tutorials
+- o'reilly
+- buildnewgames.com/webgl-threejs/
