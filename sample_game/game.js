@@ -16,6 +16,7 @@ var playerPaddle, cpuPaddle, ball;
 var playerPaddleDirY = 0, cpuPaddleDirY = 0, paddleSpeed = 3;
 var ballDirX = 1, ballDirY = 1, ballSpeed = 2;
 var difficulty = 0.3; // 0 = doesn't move. 1 = impossible
+var restartDelay = 1000;
 
 // Scene objects
 var renderer, scene, camera, pointLight, spotLight;
@@ -283,14 +284,22 @@ function updateScoreboard() {
 function resetBall(loser) {
     ball.position.x = 0;
     ball.position.y = 0;
-    if (loser === "player") {
-        ballDirX = -1;
-    }
-    else {
-        ballDirX = 1;
-    }
-    ballDirY = 1;
+    
+    ballDirX = 0;
+    ballDirY = 0;
+    
+    setTimeout(function() {
+        if (loser === "player") {
+            ballDirX = -1;
+        }
+        else {
+            ballDirX = 1;
+        }
+        ballDirY = 1; 
+    }, restartDelay);
 }
+
+var bounceTime = 0;a
 
 function gameOver(winner) {
     ballSpeed = 0;
@@ -310,7 +319,7 @@ function paddlePhysics() {
     // if ball is aligned with playerPaddle on x plane, playerPaddle collided with ball.
     // remember the position is the center of the object.
     // only check between front and middle of paddle.
-    if (ball.position.x <= playerPaddle.position.x + PADDLE_WIDTH &&
+    if (ball.position.x <= playerPaddle.position.x + (PADDLE_WIDTH * 0.7) &&
         ball.position.x >= playerPaddle.position.x) {
         // ... and ball is aligned with playerPaddle on y plane
         if (ball.position.y <= playerPaddle.position.y + PADDLE_HEIGHT/2 &&
@@ -327,7 +336,7 @@ function paddlePhysics() {
     }
     
     // if ball is aligned with cpuPaddle on the x plane, cpuPaddle collided with the ball.
-    if (ball.position.x <= cpuPaddle.position.x + PADDLE_WIDTH &&
+    if (ball.position.x <= cpuPaddle.position.x + (PADDLE_WIDTH * 0.7) &&
         ball.position.x >= cpuPaddle.position.x) {
         // ... and ball is aligned with cpuPaddle on y plane
         if (ball.position.y <= cpuPaddle.position.y + PADDLE_HEIGHT/2 &&
@@ -349,14 +358,21 @@ function cameraPhysics() {
     spotLight.position.y = ball.position.y * 2;
     
     // move behind the player's paddle
+    camera.position.x = playerPaddle.position.x - 100;
+    camera.position.y += (playerPaddle.position.y - camera.position.y) * 0.05;
+    camera.position.z = playerPaddle.position.z + 100 + (0.04 * (-ball.position.x + playerPaddle.position.x));
     
+    // rotate to face the correct way
+    camera.rotation.x = -0.01 * (ball.position.y) * (Math.PI/180);
+    camera.rotation.y = -60 * Math.PI/180;
+    camera.rotation.z = -90 * Math.PI/180;
 }
 
 function playerPaddleMovement() {
     if (Key.isDown(Key.A)) {
         // only move if not touching the side of table
-        if (playerPaddle.position.y < ((FIELD_HEIGHT * 0.5) - (PADDLE_HEIGHT * 0.5))) {
-            playerPaddleDirY = paddleSpeed * 0.5;
+        if (playerPaddle.position.y < ((FIELD_HEIGHT / 2) - (PADDLE_HEIGHT / 2))) {
+            playerPaddleDirY = paddleSpeed / 2;
         }
         // else cant move so stretch to indicate stuck
         else {
@@ -366,8 +382,8 @@ function playerPaddleMovement() {
     }
     else if (Key.isDown(Key.D)) {
         // only move if not touching the side of table
-        if (playerPaddle.position.y > -((FIELD_HEIGHT * 0.5) - (PADDLE_HEIGHT * 0.5))) {
-            playerPaddleDirY = -paddleSpeed * 0.5;
+        if (playerPaddle.position.y > -((FIELD_HEIGHT / 2) - (PADDLE_HEIGHT / 2))) {
+            playerPaddleDirY = -paddleSpeed / 2;
         }
         // else cant move so stretch to indicate stuck
         else {
@@ -405,14 +421,19 @@ function opponentPaddleMovement() {
     }
     
     // make sure to reign in the position if it overshoots the side of the board
-    if (cpuPaddleDirY > 0 && cpuPaddle.position.y >= ((FIELD_HEIGHT * 0.5) - (PADDLE_HEIGHT * 0.5))) {
-        cpuPaddle.position.y = (FIELD_HEIGHT * 0.5) - (PADDLE_HEIGHT * 0.5);
+    if (cpuPaddleDirY > 0 && cpuPaddle.position.y >= ((FIELD_HEIGHT / 2) - (PADDLE_HEIGHT / 2))) {
+        cpuPaddle.position.y = (FIELD_HEIGHT / 2) - (PADDLE_HEIGHT / 2);
+        // stretch to show hit the wall
+        cpuPaddle.scale.z += (10 - cpuPaddle.scale.z) * 0.2;
     }
-    else if (cpuPaddleDirY < 0 && cpuPaddle.position.y <= -((FIELD_HEIGHT * 0.5) - (PADDLE_HEIGHT * 0.5))) {
-        cpuPaddle.position.y = -((FIELD_HEIGHT * 0.5) - (PADDLE_HEIGHT * 0.5));
+    else if (cpuPaddleDirY < 0 && cpuPaddle.position.y <= -((FIELD_HEIGHT / 2) - (PADDLE_HEIGHT / 2))) {
+        cpuPaddle.position.y = -((FIELD_HEIGHT / 2) - (PADDLE_HEIGHT / 2));
+        // stretch to show hit the wall
+        cpuPaddle.scale.z += (10 - cpuPaddle.scale.z) * 0.2;
     }
     // scale back to normal every frame
     cpuPaddle.scale.y += (1 - cpuPaddle.scale.y) * 0.2;
+    cpuPaddle.scale.z += (1 - cpuPaddle.scale.z) * 0.2;
 }
 
 
