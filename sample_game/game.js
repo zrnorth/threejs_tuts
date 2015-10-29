@@ -16,7 +16,8 @@ var playerPaddle, cpuPaddle, ball;
 var playerPaddleDirY = 0, cpuPaddleDirY = 0, paddleSpeed = 3;
 var ballDirX = 1, ballDirY = 1, ballSpeed = 2;
 var difficulty = 0.3; // 0 = doesn't move. 1 = impossible
-var restartDelay = 1000;
+var restartDelay = 500;
+var currentlyDelaying = false;
 
 // Scene objects
 var renderer, scene, camera, pointLight, spotLight;
@@ -237,16 +238,21 @@ function setupLights() {
 function ballPhysics() {
     // ball goes off 'left' side (player's side)
     if (ball.position.x <= -FIELD_WIDTH/2) {
-        cpuScore++;
-        updateScoreboard();
-        resetBall("cpu");
+        // only run this once, even though the ball will "freeze"
+        if (!currentlyDelaying) {
+            cpuScore++;
+            updateScoreboard();
+            resetBall("cpu");            
+        }
     }
     
     // ball goes off 'right' side (cpu's side)
     if (ball.position.x >= FIELD_WIDTH/2) {
-        playerScore++;
-        updateScoreboard();
-        resetBall("player");
+        if (!currentlyDelaying) {
+              playerScore++;
+            updateScoreboard();
+            resetBall("player");  
+        }
     }
     
     // ball goes off the 'top' side or 'bot' side
@@ -263,7 +269,7 @@ function ballPhysics() {
         ballDirY = ballSpeed * 2;
     }
     if (ballDirY < -ballSpeed * 2) {
-        ballDirY = -ballSpeed * 2;
+        ballDirY = -ballSdpeed * 2;
     }
 }
 
@@ -282,21 +288,28 @@ function updateScoreboard() {
 }
 
 function resetBall(loser) {
-    ball.position.x = 0;
-    ball.position.y = 0;
-    
+    // stop ball first, then slight delay, then move to center, then slight delay, then go.
     ballDirX = 0;
     ballDirY = 0;
     
+    currentlyDelaying = true;
+    
     setTimeout(function() {
-        if (loser === "player") {
-            ballDirX = -1;
-        }
-        else {
-            ballDirX = 1;
-        }
-        ballDirY = 1; 
-    }, restartDelay);
+        ball.position.x = 0;
+        ball.position.y = 0;
+        
+        setTimeout(function() {
+            if (loser === "player") {
+                ballDirX = -1;
+            }
+            else {
+                ballDirX = 1;
+            }
+            ballDirY = 1; 
+            // when get here, all done, because ball is reset
+            currentlyDelaying = false;
+        }, restartDelay/2);
+    }, restartDelay/2);   
 }
 
 var bounceTime = 0;a
