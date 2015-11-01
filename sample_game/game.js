@@ -312,7 +312,7 @@ function resetBall(loser) {
     }, restartDelay/2);   
 }
 
-var bounceTime = 0;a
+var bounceTime = 0;
 
 function gameOver(winner) {
     ballSpeed = 0;
